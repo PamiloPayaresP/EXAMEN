@@ -43,6 +43,13 @@ export default function HomeScreen({ onSelectUnit, onOpenFormulas, onOpenHistory
             <Calculator className="h-4 w-4" />
             Formulario
           </button>
+          <a
+            href="/"
+            className="inline-flex items-center gap-2 rounded-xl border border-white/25 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+          >
+            <BookOpenText className="h-4 w-4" />
+            Ver todas las materias
+          </a>
           <button
             onClick={onOpenHistory}
             className="inline-flex items-center gap-2 rounded-xl border border-white/25 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10"

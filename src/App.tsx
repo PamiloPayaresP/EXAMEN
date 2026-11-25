@@ -5,6 +5,7 @@ import QuestionCard from '@/components/QuestionCard';
 import OpenQuestionCard from '@/components/OpenQuestionCard';
 import ResultsScreen from '@/components/ResultsScreen';
 import FormulaSheet from '@/components/FormulaSheet';
+import SubjectsApp from '@/components/SubjectsApp';
 import { units, type Unit } from '@/data/types';
 import { mcQuestions } from '@/data/mcQuestions';
 import { openQuestions } from '@/data/openQuestions';
@@ -17,7 +18,7 @@ import {
 
 type View = 'home' | 'quiz' | 'open' | 'results';
 
-export default function App() {
+function EconomicsUnitsApp() {
   const [view, setView] = useState<View>('home');
   const [unit, setUnit] = useState<Unit | null>(null);
   const [showFormulas, setShowFormulas] = useState(false);
@@ -393,5 +394,21 @@ function HistoryModal({ sessions, onClose }: { sessions: SessionRow[]; onClose: 
         )}
       </div>
     </div>
+  );
+}
+
+export default function App() {
+  const showEconomicsUnits = new URLSearchParams(window.location.search).get('vista') === 'unidades';
+
+  if (showEconomicsUnits) {
+    return <EconomicsUnitsApp />;
+  }
+
+  return (
+    <SubjectsApp
+      onOpenEconomicsUnits={() => {
+        window.location.href = '/?vista=unidades';
+      }}
+    />
   );
 }
