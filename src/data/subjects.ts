@@ -1,6 +1,15 @@
+import { roboticsQuestions } from './roboticsQuestions';
+
 export type Topic = [term: string, definition: string, scenario: string, objective: string];
 export type Calculation = [prompt: string, correct: string, optionB: string, optionC: string, optionD: string];
 export interface Formula { name: string; display: string; tokens: string[]; }
+export interface SubjectQuestion {
+  unit: 1 | 2 | 3 | 4;
+  stem: string;
+  choices: string[];
+  correct: string;
+  explanation: string;
+}
 export interface CodeQuestion {
   prompt: string;
   snippet: string;
@@ -15,6 +24,7 @@ export interface Subject {
   calculations?: Record<number, Calculation>;
   formulas?: Record<number, Formula>;
   codeQuestions?: Record<number, CodeQuestion>;
+  questions?: SubjectQuestion[];
 }
 
 export const subjects: Subject[] = [
@@ -289,5 +299,16 @@ export const subjects: Subject[] = [
             explanation: "`Promise.allSettled` espera todas las promesas y reporta por separado si cada una se cumplió o rechazó; no hace reintentos ni crea una transacción."
           }
         }
-      }
+      },
+    {
+      name: "Robótica",
+      description: "Fundamentos de robótica, microcontroladores, componentes electrónicos, sensores, actuadores, circuitos y diseño de robots.",
+      topics: [
+        ["Fundamentos de robótica", "Disciplina que combina ingeniería, ciencia y tecnología para diseñar y construir robots.", "Se define qué tareas realizará un robot y cómo integrar sus componentes.", "comprender la estructura y el funcionamiento de los robots"],
+        ["Control y sensores", "Los sensores captan información del entorno y los programas microcontrolados permiten procesarla y responder.", "Un sensor mide una condición y envía la lectura al microcontrolador.", "programar dispositivos y captar señales del entorno"],
+        ["Actuadores y circuitos", "Los actuadores transforman señales de control en movimientos o acciones físicas.", "Un motor recibe una señal para cambiar la dirección de un robot móvil.", "implementar circuitos que produzcan acciones físicas"],
+        ["Diseño y aplicaciones", "El diseño adapta la estructura, los componentes y el control del robot a sus funciones y entorno.", "Se seleccionan sensores, actuadores y materiales para una aplicación específica.", "diseñar robots considerando sus requisitos y aplicaciones"],
+      ],
+      questions: roboticsQuestions,
+    },
     ];

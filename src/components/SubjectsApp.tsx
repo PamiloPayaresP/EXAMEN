@@ -34,7 +34,7 @@ interface EquationToken {
 
 type View = 'dashboard' | 'subject' | 'quiz' | 'results';
 
-const subjectIcons = ['AE', 'ARQ', 'SEG', 'SIG', 'IE', 'PD'];
+const subjectIcons = ['AE', 'ARQ', 'SEG', 'SIG', 'IE', 'PD', 'ROB'];
 const questionForms = [
   (topic: Subject['topics'][number]) => `¿Qué opción define correctamente «${topic[0]}»?`,
   (topic: Subject['topics'][number]) =>
@@ -54,7 +54,23 @@ function shuffle<T>(items: T[]): T[] {
   return result;
 }
 
+function getQuestionCount(subject: Subject): number {
+  return subject.questions?.length ?? subject.topics.length * questionForms.length;
+}
+
 function makeQuestionBank(subject: Subject, subjectIndex: number): StudyQuestion[] {
+  if (subject.questions) {
+    return subject.questions.map((question, index) => ({
+      id: `${subjectIndex}-${question.unit}-${index}`,
+      text: question.stem,
+      choices: shuffle(question.choices),
+      correct: question.correct,
+      equation: null,
+      kind: `Unidad ${question.unit} · Robótica`,
+      explanation: question.explanation,
+    }));
+  }
+
   return subject.topics.flatMap((topic, topicIndex) =>
     questionForms.map((makePrompt, formIndex) => {
       const calculation = subject.calculations?.[topicIndex];
@@ -190,6 +206,7 @@ export default function SubjectsApp({ onOpenEconomicsUnits }: Props) {
 
   function chooseSubject(selected: Subject) {
     setSubject(selected);
+    setQuestionCount((count) => Math.min(count, getQuestionCount(selected)));
     setView('subject');
   }
 
@@ -312,14 +329,16 @@ export default function SubjectsApp({ onOpenEconomicsUnits }: Props) {
                 Selecciona una materia
               </h2>
               <p className="mt-2 text-sm leading-relaxed text-slate-500">
-                Cada asignatura incluye 80 preguntas. Elige la cantidad y el tiempo para iniciar
-                una evaluación interactiva.
+                Los bancos tienen distintas cantidades de preguntas según la materia. Elige la
+                cantidad y el tiempo para iniciar una evaluación interactiva.
               </p>
             </div>
 
             <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {subjects.map((item, index) => {
                 const calculationCount = Object.keys(item.calculations ?? {}).length;
+                const codeQuestionCount = Object.keys(item.codeQuestions ?? {}).length;
+                const availableQuestionCount = getQuestionCount(item);
                 return (
                   <button
                     key={item.name}
@@ -333,12 +352,14 @@ export default function SubjectsApp({ onOpenEconomicsUnits }: Props) {
                       {item.name}
                     </span>
                     <span className="mt-1 block text-xs font-bold text-blue-700">
-                      80 preguntas
+                      {availableQuestionCount} preguntas
                       {calculationCount
                         ? ` · ${calculationCount} ejercicios con ecuación`
-                        : Object.keys(item.codeQuestions ?? {}).length
-                          ? ` · ${Object.keys(item.codeQuestions ?? {}).length} preguntas con código`
-                          : ' · evaluación conceptual'}
+                        : codeQuestionCount
+                          ? ` · ${codeQuestionCount} preguntas con código`
+                          : item.questions
+                            ? ' · preguntas de 4 unidades'
+                            : ' · evaluación conceptual'}
                     </span>
                     <span className="mt-2 block text-sm leading-relaxed text-slate-500">
                       {item.description}
@@ -350,7 +371,9 @@ export default function SubjectsApp({ onOpenEconomicsUnits }: Props) {
 
             <div className="mt-6 flex flex-wrap gap-3 text-xs font-bold text-slate-600">
               <span className="rounded-full bg-slate-100 px-3 py-2">{subjects.length} materias</span>
-              <span className="rounded-full bg-slate-100 px-3 py-2">{subjects.length * 80} preguntas disponibles</span>
+              <span className="rounded-full bg-slate-100 px-3 py-2">
+                {subjects.reduce((total, item) => total + getQuestionCount(item), 0)} preguntas disponibles
+              </span>
               <span className="rounded-full bg-slate-100 px-3 py-2">Taller de fórmulas</span>
             </div>
           </section>
@@ -412,7 +435,7 @@ export default function SubjectsApp({ onOpenEconomicsUnits }: Props) {
                   onChange={(event) => setQuestionCount(Number(event.target.value))}
                   className="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-3 py-3 text-sm font-semibold"
                 >
-                  {[10, 20, 40, 80].map((count) => (
+                  {[10, 20, 40, 80].filter((count) => count <= questionBank.length).map((count) => (
                     <option key={count} value={count}>
                       {count} preguntas
                     </option>
@@ -686,8 +709,8 @@ export default function SubjectsApp({ onOpenEconomicsUnits }: Props) {
         )}
       </main>
       <footer className="mx-auto max-w-6xl px-4 pb-8 text-xs leading-relaxed text-slate-400 sm:px-6 lg:px-8">
-        Preguntas de práctica de cinco materias. Ingeniería Económica incluye fórmulas y ejercicios
-        de cálculo.
+        Preguntas de práctica de {subjects.length} materias. Ingeniería Económica incluye fórmulas
+        y ejercicios de cálculo.
       </footer>
     </div>
   );
